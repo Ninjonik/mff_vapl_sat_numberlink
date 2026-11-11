@@ -1,6 +1,5 @@
 
-import subprocess
-import sys
+import os, sys, subprocess
 from pathlib import Path
 
 
@@ -8,6 +7,9 @@ BASE_DIR = Path(__file__).resolve().parent
 MAIN_FILE = BASE_DIR / "main.py"
 INSTANCES_DIR = BASE_DIR / "instances"
 
+env = os.environ.copy()
+env["PYTHONIOENCODING"] = "utf-8"
+env["PYTHONUTF8"] = "1"
 
 def run_all_tests():
     if not INSTANCES_DIR.exists():
@@ -36,18 +38,15 @@ def run_all_tests():
         expected_code = 20 if expected_unsat else 10
 
         result = subprocess.run(
-            [
-                sys.executable,
-                str(MAIN_FILE),
-                "-i", str(filepath),
-                "-v", "1"
-            ],
+            [sys.executable, str(MAIN_FILE), "-i", str(filepath), "-v", "0"],
             capture_output=True,
             text=True,
-            cwd=BASE_DIR
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+            cwd=BASE_DIR,
         )
-
-        output = result.stdout
+        output = result.stdout or ""
 
         print(f"\n{'=' * 10} VÝSTUP PRE: {filename} {'=' * 10}")
 
